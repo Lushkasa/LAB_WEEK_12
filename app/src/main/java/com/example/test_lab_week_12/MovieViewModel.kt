@@ -49,11 +49,15 @@ class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel()
     // fetch movies from the API
     private fun fetchPopularMovies() {
         viewModelScope.launch(Dispatchers.IO) {
-            movieRepository.fetchMovies().catch {
-                _error.value = "An exception occurred: ${it.message}"
-            }.collect {
-                _popularMovies.value = it
-            }
+            movieRepository.fetchMovies()
+                .catch {
+                    _error.value = "An exception occurred: ${it.message}"
+                }
+                .collect { movieList ->
+                    val sorted = movieList.sortedByDescending { it.popularity }
+                    _popularMovies.value = sorted
+                }
         }
     }
+
 }
